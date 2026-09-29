@@ -1,0 +1,1 @@
+package com.solarmind.dto.response; import java.math.BigDecimal; import java.time.Instant; public record AssessmentSummary(Long id,BigDecimal recommendedCapacityKw,BigDecimal annualSavings,Instant createdAt){}

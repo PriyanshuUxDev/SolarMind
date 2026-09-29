@@ -1,0 +1,1 @@
+package com.solarmind.dto.request; import jakarta.validation.constraints.*; import java.math.BigDecimal; public record AssessmentRequest(@NotNull Long locationId,@NotNull @Positive BigDecimal monthlyConsumption,@NotNull @PositiveOrZero BigDecimal monthlyBill,@NotNull @Positive BigDecimal roofArea,@NotBlank String roofType,@NotNull @Positive BigDecimal budget){}

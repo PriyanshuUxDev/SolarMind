@@ -1,0 +1,31 @@
+spring:
+  application.name: solarmind-backend
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate.ddl-auto: validate
+  config.import: optional:classpath:application-dev.yml
+server.port: 8080
+solarmind:
+  assumptions:
+    generation-factor-kwh-per-kw-year: ${GENERATION_FACTOR_KWH_PER_KW_YEAR}
+    installation-cost-per-kw: ${INSTALLATION_COST_PER_KW}
+    grid-emission-factor: ${GRID_EMISSION_FACTOR}
+    roof-layout-factor: ${ROOF_LAYOUT_FACTOR}
+    roof-type-usable-factor:
+      FLAT: ${ROOF_TYPE_USABLE_FACTOR_FLAT}
+      SLOPED: ${ROOF_TYPE_USABLE_FACTOR_SLOPED}
+      OTHER: ${ROOF_TYPE_USABLE_FACTOR_OTHER}
+  ai.service-url: ${AI_SERVICE_URL}
+  ai.timeout: ${AI_TIMEOUT:20s}
+  ai.internal-token: ${AI_INTERNAL_TOKEN}
+  jwt.secret: ${JWT_SECRET}
+  jwt.expiration-ms: ${JWT_EXPIRATION_MS}
+  cors.allowed-origin: ${CORS_ALLOWED_ORIGIN:http://localhost:5173}
+  csv:
+    import-enabled: ${CSV_IMPORT_ENABLED:true}
+    panels-path: ${PANELS_CSV_PATH:data/solar_panels_india.csv}
+    locations-path: ${LOCATIONS_CSV_PATH:data/punjab_delhi_ncr_coordinates.csv}
