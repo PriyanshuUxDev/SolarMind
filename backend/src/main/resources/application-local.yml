@@ -1,0 +1,38 @@
+# Local smoke profile only. It never selects production infrastructure or values.
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: jdbc:h2:mem:solarmind-local;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+server:
+  port: 8080
+
+solarmind:
+  assumptions:
+    # Test-only values: replace with environment-backed production assumptions.
+    generation-factor-kwh-per-kw-year: 1
+    installation-cost-per-kw: 1
+    grid-emission-factor: 1
+    roof-layout-factor: 1
+    roof-type-usable-factor:
+      FLAT: 1
+      SLOPED: 1
+      OTHER: 1
+  ai:
+    service-url: http://localhost:8000
+    timeout: 5s
+    internal-token: ${AI_INTERNAL_TOKEN}
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-ms: 3600000
+  csv:
+    import-enabled: true
+    panels-path: ${PANELS_CSV_PATH}
+    locations-path: ${LOCATIONS_CSV_PATH}

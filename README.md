@@ -12,9 +12,24 @@ SolarMind is a scoped rooftop-solar recommendation app. Spring Boot owns authent
 
 ## Run
 
+### Fast local backend smoke run
+
+From PowerShell at the repository root:
+
+```powershell
+.\backend\run-dev.ps1
+```
+
+This uses an isolated in-memory H2 database, imports the supplied CSV files,
+and generates a temporary JWT secret for that process. The assumptions in the
+`local` profile are test-only values; do not use them for real recommendations.
+`GET http://localhost:8080/api/health` should return `{"status":"ok"}`.
+
+### Full local stack with MySQL
+
 1. Copy `.env.example` to local environment variables and replace every `PLACEHOLDER_*` value. Do not commit the local file.
 2. Start MySQL and create the `solarmind` database.
-3. Backend: `cd backend; mvn spring-boot:run -Dspring-boot.run.profiles=dev`
+3. Backend: `cd backend; mvn spring-boot:run "-Dspring-boot.run.profiles=dev"`
 4. AI service: `cd ai-service; python -m uvicorn main:app --reload --port 8000`
 5. Frontend: `cd frontend; npm install; npm run dev`
 
