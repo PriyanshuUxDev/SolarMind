@@ -1,1 +1,33 @@
-package com.solarmind.controller; import com.solarmind.dto.request.AssessmentRequest; import com.solarmind.dto.response.*; import com.solarmind.service.AssessmentService; import jakarta.validation.Valid; import org.springframework.web.bind.annotation.*; import java.util.List; @RestController @RequestMapping("/api/assessments") public class AssessmentController { private final AssessmentService s; public AssessmentController(AssessmentService s){this.s=s;} @PostMapping AssessmentResponse create(@Valid @RequestBody AssessmentRequest r){return s.create(r);} @GetMapping List<AssessmentSummary> list(){return s.list();} @GetMapping("/{id}") AssessmentResponse get(@PathVariable Long id){return s.get(id);} }
+package com.solarmind.controller;
+
+import com.solarmind.dto.request.AssessmentRequest;
+import com.solarmind.dto.response.*;
+import com.solarmind.service.AssessmentService;
+import jakarta.validation.Valid;
+import java.util.List;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/assessments")
+public class AssessmentController {
+  private final AssessmentService s;
+
+  public AssessmentController(AssessmentService s) {
+    this.s = s;
+  }
+
+  @PostMapping
+  AssessmentResponse create(@Valid @RequestBody AssessmentRequest r) {
+    return s.create(r);
+  }
+
+  @GetMapping
+  List<AssessmentSummary> list() {
+    return s.list();
+  }
+
+  @GetMapping("/{id}")
+  AssessmentResponse get(@PathVariable Long id) {
+    return s.get(id);
+  }
+}

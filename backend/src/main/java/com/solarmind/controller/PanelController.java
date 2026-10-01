@@ -1,1 +1,36 @@
-package com.solarmind.controller; import com.solarmind.dto.response.*; import com.solarmind.service.PanelService; import org.springframework.web.bind.annotation.*; import java.math.BigDecimal; @RestController @RequestMapping("/api/panels") public class PanelController { private final PanelService s; public PanelController(PanelService s){this.s=s;} @GetMapping PagedResponse<PanelResponse> list(@RequestParam(defaultValue="0") int page,@RequestParam(defaultValue="20") int size,@RequestParam(required=false) String search,@RequestParam(required=false) String brand,@RequestParam(required=false) Integer minWattage,@RequestParam(required=false) Integer maxWattage,@RequestParam(required=false) BigDecimal minEfficiency,@RequestParam(required=false) String sort,@RequestParam(required=false) String direction){return s.list(page,size,search,brand,minWattage,maxWattage,minEfficiency,sort,direction);} @GetMapping("/{id}") PanelResponse get(@PathVariable Long id){return s.get(id);} }
+package com.solarmind.controller;
+
+import com.solarmind.dto.response.*;
+import com.solarmind.service.PanelService;
+import java.math.BigDecimal;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/panels")
+public class PanelController {
+  private final PanelService s;
+
+  public PanelController(PanelService s) {
+    this.s = s;
+  }
+
+  @GetMapping
+  PagedResponse<PanelResponse> list(
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "20") int size,
+      @RequestParam(required = false) String search,
+      @RequestParam(required = false) String brand,
+      @RequestParam(required = false) Integer minWattage,
+      @RequestParam(required = false) Integer maxWattage,
+      @RequestParam(required = false) BigDecimal minEfficiency,
+      @RequestParam(required = false) String sort,
+      @RequestParam(required = false) String direction) {
+    return s.list(
+        page, size, search, brand, minWattage, maxWattage, minEfficiency, sort, direction);
+  }
+
+  @GetMapping("/{id}")
+  PanelResponse get(@PathVariable Long id) {
+    return s.get(id);
+  }
+}

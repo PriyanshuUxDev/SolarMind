@@ -6,6 +6,7 @@ __pycache__/
 *.pyc
 .env
 .env.*
+!.env.example
 *.log
 data/raw/*.csv
 graphify-out/
@@ -15,4 +16,3 @@ ARCHITECTURE.md
 coverage/
 .vscode/
 *.iml
-

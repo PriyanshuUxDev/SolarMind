@@ -1,1 +1,17 @@
-package com.solarmind.service; import com.solarmind.dto.response.DashboardResponse; import org.springframework.stereotype.Service; @Service public class DashboardService { private final AssessmentService assessments; public DashboardService(AssessmentService assessments){this.assessments=assessments;} public DashboardResponse get(){return new DashboardResponse(assessments.latest(),assessments.list());} }
+package com.solarmind.service;
+
+import com.solarmind.dto.response.DashboardResponse;
+import org.springframework.stereotype.Service;
+
+@Service
+public class DashboardService {
+  private final AssessmentService assessments;
+
+  public DashboardService(AssessmentService assessments) {
+    this.assessments = assessments;
+  }
+
+  public DashboardResponse get() {
+    return new DashboardResponse(assessments.latest(), assessments.list());
+  }
+}

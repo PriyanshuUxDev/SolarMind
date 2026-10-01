@@ -1,1 +1,22 @@
-package com.solarmind.service; import com.solarmind.config.SolarProperties; import java.math.BigDecimal; import java.math.RoundingMode; import org.springframework.stereotype.Service; @Service public class ConfigGenerationEstimator implements GenerationEstimator { private final SolarProperties properties; public ConfigGenerationEstimator(SolarProperties properties){this.properties=properties;} public BigDecimal estimate(BigDecimal capacityKw){return capacityKw.multiply(properties.generationFactorKwhPerKwYear()).setScale(2,RoundingMode.HALF_UP);} }
+package com.solarmind.service;
+
+import com.solarmind.config.SolarProperties;
+import com.solarmind.entity.Location;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import org.springframework.stereotype.Service;
+
+@Service
+public class ConfigGenerationEstimator implements GenerationEstimator {
+  private final SolarProperties properties;
+
+  public ConfigGenerationEstimator(SolarProperties properties) {
+    this.properties = properties;
+  }
+
+  public BigDecimal estimate(BigDecimal capacityKw, Location location) {
+    return capacityKw
+        .multiply(properties.generationFactorKwhPerKwYear())
+        .setScale(2, RoundingMode.HALF_UP);
+  }
+}

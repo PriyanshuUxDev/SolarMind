@@ -1,30 +1,32 @@
-# Local smoke profile only. It never selects production infrastructure or values.
+# Local development profile using MySQL. Database credentials must be supplied
+# through DATABASE_URL, DATABASE_USERNAME, and DATABASE_PASSWORD.
 spring:
   config:
     activate:
       on-profile: local
   datasource:
-    url: jdbc:h2:mem:solarmind-local;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    username: sa
-    password:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
+  flyway:
+    enabled: true
 
 server:
   port: 8080
 
 solarmind:
   assumptions:
-    # Test-only values: replace with environment-backed production assumptions.
-    generation-factor-kwh-per-kw-year: 1
-    installation-cost-per-kw: 1
-    grid-emission-factor: 1
-    roof-layout-factor: 1
+    generation-factor-kwh-per-kw-year: ${GENERATION_FACTOR_KWH_PER_KW_YEAR}
+    installation-cost-per-kw: ${INSTALLATION_COST_PER_KW}
+    grid-emission-factor: ${GRID_EMISSION_FACTOR}
+    roof-layout-factor: ${ROOF_LAYOUT_FACTOR}
     roof-type-usable-factor:
-      FLAT: 1
-      SLOPED: 1
-      OTHER: 1
+      FLAT: ${ROOF_TYPE_USABLE_FACTOR_FLAT}
+      SLOPED: ${ROOF_TYPE_USABLE_FACTOR_SLOPED}
+      OTHER: ${ROOF_TYPE_USABLE_FACTOR_OTHER}
   ai:
     service-url: http://localhost:8000
     timeout: 5s

@@ -3,7 +3,7 @@ import { api } from "../services/api";
 import type { PanelResponse, PagedResponse } from "../types";
 import Input from "../components/Input";
 import Select from "../components/Select";
-import PanelSvg from "../components/PanelSvg";
+import PanelSvg, { parsePanelDimensions } from "../components/PanelSvg";
 import Drawer from "../components/Drawer";
 import Loading from "../components/Loading";
 import EmptyState from "../components/EmptyState";
@@ -13,9 +13,15 @@ export default function Panels() {
   const [search, setSearch] = useState("");
   const [brand, setBrand] = useState("");
   const [sort, setSort] = useState("brand");
+  const [direction, setDirection] = useState("asc");
+  const [minWattage, setMinWattage] = useState("");
+  const [maxWattage, setMaxWattage] = useState("");
+  const [minEfficiency, setMinEfficiency] = useState("");
+  const [page, setPage] = useState(0);
   const [result, setResult] = useState<PagedResponse<PanelResponse> | null>(
     null,
   );
+  const [selectedId, setSelectedId] = useState<number | null>(null);
   const [selected, setSelected] = useState<PanelResponse | null>(null);
   const [error, setError] = useState("");
   function load() {
@@ -23,17 +29,27 @@ export default function Panels() {
     const params = new URLSearchParams({
       search,
       sort,
-      direction: "asc",
-      page: "0",
+      direction,
+      page: String(page),
       size: "12",
     });
     if (brand) params.set("brand", brand);
+    if (minWattage) params.set("minWattage", minWattage);
+    if (maxWattage) params.set("maxWattage", maxWattage);
+    if (minEfficiency) params.set("minEfficiency", minEfficiency);
     api
       .panels(`?${params}`)
       .then(setResult)
       .catch(() => setError("The panel catalog could not be loaded."));
   }
-  useEffect(load, [search, sort, brand]);
+  useEffect(load, [search, sort, direction, brand, minWattage, maxWattage, minEfficiency, page]);
+  useEffect(() => {
+    if (selectedId == null) {
+      setSelected(null);
+      return;
+    }
+    api.panel(selectedId).then(setSelected).catch(() => setError("The panel details could not be loaded."));
+  }, [selectedId]);
   return (
     <main id="main-content" className="page-shell">
       <header className="page-intro">
@@ -51,15 +67,33 @@ export default function Panels() {
           <input
             className="ui-input"
             value={search}
-            onChange={(event) => setSearch(event.target.value)}
+            onChange={(event) => {
+              setPage(0);
+              setSearch(event.target.value);
+            }}
             placeholder="Brand or model"
           />
+        </label>
+        <label>
+          Minimum wattage
+          <Input type="number" min="0" value={minWattage} onChange={(event) => { setPage(0); setMinWattage(event.target.value); }} />
+        </label>
+        <label>
+          Maximum wattage
+          <Input type="number" min="0" value={maxWattage} onChange={(event) => { setPage(0); setMaxWattage(event.target.value); }} />
+        </label>
+        <label>
+          Minimum efficiency
+          <Input type="number" min="0" step="any" value={minEfficiency} onChange={(event) => { setPage(0); setMinEfficiency(event.target.value); }} />
         </label>
         <label>
           Brand
           <Input
             value={brand}
-            onChange={(event) => setBrand(event.target.value)}
+            onChange={(event) => {
+              setPage(0);
+              setBrand(event.target.value);
+            }}
             placeholder="All brands"
           />
         </label>
@@ -67,12 +101,22 @@ export default function Panels() {
           Sort
           <Select
             value={sort}
-            onChange={(event) => setSort(event.target.value)}
+            onChange={(event) => {
+              setPage(0);
+              setSort(event.target.value);
+            }}
           >
             <option value="brand">Brand</option>
             <option value="model">Model</option>
             <option value="wattage">Wattage</option>
             <option value="efficiency">Efficiency</option>
+          </Select>
+        </label>
+        <label>
+          Direction
+          <Select value={direction} onChange={(event) => { setPage(0); setDirection(event.target.value); }}>
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
           </Select>
         </label>
       </section>
@@ -96,9 +140,10 @@ export default function Panels() {
             <button
               className="panel-item"
               key={panel.id}
-              onClick={() => setSelected(panel)}
+              type="button"
+              onClick={() => setSelectedId(panel.id)}
             >
-              <PanelSvg />
+              <PanelSvg {...parsePanelDimensions(panel.dimensions)} />
               <span>
                 <strong>{panel.brand}</strong>
                 <b>{panel.model}</b>
@@ -111,21 +156,35 @@ export default function Panels() {
           ))}
         </div>
       )}
+      {result && result.totalPages > 1 && (
+        <nav aria-label="Panel pages" className="pagination">
+          <button type="button" disabled={page === 0} onClick={() => setPage((current) => current - 1)}>
+            Previous
+          </button>
+          <span>Page {result.page + 1} of {result.totalPages}</span>
+          <button type="button" disabled={page >= result.totalPages - 1} onClick={() => setPage((current) => current + 1)}>
+            Next
+          </button>
+        </nav>
+      )}
       <Drawer
         open={Boolean(selected)}
         title={
           selected ? `${selected.brand} · ${selected.model}` : "Panel details"
         }
-        onClose={() => setSelected(null)}
+        onClose={() => setSelectedId(null)}
       >
         {selected && (
           <div className="ledger">
             <Ledger label="Wattage" value={`${selected.wattage} W`} />
+            <Ledger label="Daily output" value={selected.dailyOutput != null ? `${selected.dailyOutput} kWh/day` : "Not provided"} />
+            <Ledger label="Monthly output" value={selected.monthlyOutput != null ? `${selected.monthlyOutput} kWh/month` : "Not provided"} />
             <Ledger label="Efficiency" value={`${selected.efficiency}%`} />
-            <Ledger
-              label="Dimensions"
-              value={selected.dimensions || "Not provided"}
-            />
+            <Ledger label="Voltage (Vmpp)" value={selected.vmpp != null ? `${selected.vmpp} V` : "Not provided"} />
+            <Ledger label="Current (Impp)" value={selected.impp != null ? `${selected.impp} A` : "Not provided"} />
+            <PanelSvg {...parsePanelDimensions(selected.dimensions)} />
+            <Ledger label="Dimensions" value={selected.dimensions || "Not provided"} />
+            <Ledger label="Weight" value={selected.weight != null ? `${selected.weight} kg` : "Not provided"} />
           </div>
         )}
       </Drawer>

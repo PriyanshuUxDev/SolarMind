@@ -1,60 +1,103 @@
-# Architecture map
+# SolarMind architecture map
 
 ## Current tree
 
 ```text
-frontend/             React + TypeScript + Vite skeleton
-backend/              Spring Boot + Maven skeleton
-ai-service/           FastAPI skeleton
-data/raw/             Reserved immutable CSV location
-docs/                 Project documentation
-context/              Binding source documents
+frontend/             React + TypeScript + Vite application
+backend/              Spring Boot + Maven API and MySQL persistence layer
+ai-service/           FastAPI Gemini explanation boundary
+data/                 Immutable CSV files used for reference-data seeding
+docs/                 Project documentation and API collection
 ```
 
-The supplied CSVs currently exist under `data/`, not `data/raw/`, and were not moved or modified. Their headers are recorded in the phase notes: `solar_panels_india.csv` has Brand, Panel Name/Model, Wattage (W), Daily Output, Monthly Output, Efficiency, Vmpp, Impp, Dimensions, Weight, Product Link. `punjab_delhi_ncr_coordinates.csv` has region, city, two blank columns, district, state, latitude, longitude. Import mapping is intentionally deferred.
+Spring Boot owns authentication, JWT security, validation, MySQL persistence,
+Flyway migrations, CSV seeding, recommendation calculations, and API contracts.
+React collects inputs and renders backend responses. FastAPI is an internal
+Gemini explanation boundary and does not recalculate recommendations.
 
-Phase 1 now validates those headers at startup, imports only valid mapped rows, skips existing panel `(brand, model)` and location `(city, district, state, latitude, longitude)` keys, logs imported/duplicate/malformed counts, and performs no CSV writes. Phase 2 owns BCrypt registration, JWT issue/validation, protected assessment ownership, and generic authentication errors. Phase 3 owns location/panel search. Phase 4 owns all recommendation math in `RecommendationService`. Phase 8 owns the guarded FastAPI Gemini boundary.
+## Runtime boundaries
 
-## Boundaries
-
-Spring Boot owns authentication, persistence, validation, recommendation orchestration, and API DTOs. FastAPI is only the internal AI explanation boundary. React only collects and displays data.
+| Boundary | Responsibility |
+| --- | --- |
+| React frontend | Collect inputs, call the API, and render catalog, assessment, dashboard, and assistant views. It performs no recommendation calculations. |
+| Spring Boot backend | Authentication, validation, MySQL persistence, CSV seeding, panel/location search, recommendation calculations, ownership checks, and API errors. |
+| FastAPI AI service | Authenticate backend requests, call Gemini, and explain verified results. |
+| Flyway | Apply versioned MySQL schema migrations before normal repository access. |
 
 ## Backend class inventory
 
 | Layer | Classes | Responsibility |
-|---|---|---|
-| Controller | AuthController, LocationController, PanelController, AssessmentController, DashboardController, AIController, HealthController | Map the documented REST endpoints and delegate to services; health is the smoke-test endpoint. |
-| Service | AuthService, LocationService, PanelService, AssessmentService, RecommendationService, DashboardService, AIService | Stable service boundaries; methods currently return skeleton 501 responses. |
-| Service seam | GenerationEstimator, ConfigGenerationEstimator | Future generation-estimation boundary; no calculation yet. |
-| Repository | UserRepository, LocationRepository, SolarPanelRepository, AssessmentRepository | JPA repository boundaries for the four entities. |
-| Entity | User, Location, SolarPanel, Assessment | Persistence model with documented relationships and indexes. |
-| DTO | AuthRequests, AssessmentRequest, AskRequest; AuthResponse, AssessmentResponse, AssessmentSummary, DashboardResponse, PanelResponse, LocationResponse, AskResponse, PagedResponse, ApiError | Request validation and response contracts; entities are not returned by controllers. |
-| Security | SecurityConfig, JwtUtil, JwtAuthFilter, CustomUserDetailsService, CurrentUser, JsonAuthenticationEntryPoint, JsonAccessDeniedHandler | Stateless JWT filter chain, CORS, and JSON 401/403 responses. |
-| Config | SolarProperties, AiProperties, JwtProperties, CorsProperties, RestClientConfig | Environment-backed configuration and AI HTTP client bean. |
-| Exceptions | ResourceNotFoundException, InvalidInputException, NoSuitablePanelException, AiServiceUnavailableException, NotImplementedException, GlobalExceptionHandler | Error taxonomy and JSON error mapping. |
-| Importer | PanelCsvImporter, LocationCsvImporter | ApplicationRunner placeholders; parsing is deferred until CSV mapping is confirmed. |
+| --- | --- | --- |
+| Controllers | `AuthController`, `LocationController`, `PanelController`, `AssessmentController`, `DashboardController`, `AIController`, `HealthController` | REST endpoints and request delegation. |
+| Services | `AuthService`, `LocationService`, `PanelService`, `AssessmentService`, `RecommendationService`, `DashboardService`, `AIService` | Business operations and orchestration. |
+| Importers | `PanelCsvImporter`, `LocationCsvImporter`, `SimpleCsv` | Validate and idempotently seed reference data from CSV files. |
+| Repositories | `UserRepository`, `LocationRepository`, `SolarPanelRepository`, `AssessmentRepository` | JPA persistence access. |
+| Entities | `User`, `Location`, `SolarPanel`, `Assessment` | MySQL database model and relationships. |
+| DTOs | Request DTOs and response DTOs including `AssessmentSummary`, `AssessmentResponse`, `PanelResponse`, and `DashboardResponse` | Validated API input and output contracts. |
+| Security | `SecurityConfig`, `JwtUtil`, `JwtAuthFilter`, `CustomUserDetailsService`, `CurrentUser` | Stateless JWT authentication and ownership context. |
+| Configuration | `SolarProperties`, `AiProperties`, `JwtProperties`, `CorsProperties`, `CsvProperties`, `RestClientConfig` | Environment-backed runtime settings. |
+
+## Profiles and configuration
+
+All profiles use MySQL through `DATABASE_URL`, `DATABASE_USERNAME`, and
+`DATABASE_PASSWORD`.
+
+- `local` is the normal launcher profile. It enables Flyway, validates the
+  schema with Hibernate, imports the repository CSV files, points the AI client
+  at `http://localhost:8000`, and uses local JWT expiry settings.
+- `dev` is for deliberate schema-development work. Flyway remains enabled and
+  Hibernate uses `ddl-auto=update` so schema changes can be explored against
+  MySQL.
+- The base `application.yml` uses `ddl-auto=validate` and environment-backed
+  settings. There is no H2 configuration.
+
+The PowerShell and Bash launchers require database credentials, `JWT_SECRET`,
+and `AI_INTERNAL_TOKEN`; they fail before Maven starts if those values are
+missing. The launchers provide absolute CSV paths for `data/`.
+
+## Database lifecycle
+
+1. Flyway applies `V1__create_schema.sql` and later migrations from
+   `backend/src/main/resources/db/migration/`.
+2. Hibernate validates the schema in `local` and the base configuration.
+3. Hibernate may update the schema only when the `dev` profile is explicitly
+   selected.
+4. CSV importers seed `locations` and `solar_panels` when CSV import is enabled;
+   source files are never modified.
+5. Assessment writes persist the authenticated `user_id`, and assessment reads
+   are restricted to that owner.
+
+`baseline-on-migrate` is not enabled. New databases must be empty so Flyway can
+apply the migrations normally. An existing non-empty database without
+`flyway_schema_history` requires a backup, schema review, and a one-time
+operator-controlled baseline before normal migration validation. Applied
+migrations must not be edited.
+
+The panel source CSV may contain a `Product Link` column, but the application
+does not read, persist, or expose it. The location CSV contains extra unnamed
+columns which are intentionally ignored.
 
 ## Endpoint map
 
-| Endpoint | Controller | Service |
-|---|---|---|
-| POST `/api/auth/register` | AuthController | AuthService |
-| POST `/api/auth/login` | AuthController | AuthService |
-| GET `/api/locations/search` | LocationController | LocationService |
-| GET `/api/panels`, GET `/api/panels/{id}` | PanelController | PanelService |
-| POST `/api/assessments`, GET `/api/assessments/{id}` | AssessmentController | AssessmentService → RecommendationService later |
-| GET `/api/dashboard` | DashboardController | DashboardService |
-| POST `/api/ai/ask` | AIController | AIService → FastAPI later |
-| GET `/api/health` | HealthController | none |
+| Endpoint | Purpose |
+| --- | --- |
+| `POST /api/auth/register` | Create a user and issue a JWT. |
+| `POST /api/auth/login` | Authenticate a user and issue a JWT. |
+| `GET /api/locations/search` | Search seeded locations. |
+| `GET /api/panels` | Search and filter the seeded panel catalog. |
+| `GET /api/panels/{id}` | Read one panel's complete catalog details. |
+| `POST /api/assessments` | Validate inputs, calculate a budget-aware recommendation, and persist it. |
+| `GET /api/assessments` | Read summary records owned by the authenticated user. |
+| `GET /api/assessments/{id}` | Read one complete assessment owned by the authenticated user. |
+| `GET /api/dashboard` | Return the latest assessment and recent history. |
+| `POST /api/ai/ask` | Explain a verified assessment through the internal AI service. |
+| `GET /api/health` | Public health smoke check. |
 
-## Future ticket placement
+## Frontend build
 
-SM-001: data inspection notes. SM-002: repository/build files. SM-003: `backend/config`. SM-101–104: `entity`, `repository`, `importer`. SM-201–204: `security` and `AuthService`. SM-301–304: location/panel controllers and services. SM-401–409: assessment and recommendation service. SM-501: dashboard. SM-601–708: frontend pages/components. SM-801–804: `ai-service` and `AIService`. SM-901–906: tests, docs, and audit.
+The frontend uses Vite, React, React Router, TypeScript, and CSS. Tailwind is
+not part of the current frontend toolchain. Fontsource packages provide
+Bricolage Grotesque and Instrument Sans. Dependency versions are pinned in
+`frontend/package.json` and `frontend/package-lock.json`.
 
-## Decisions and open confirmations
-
-- JPA `ddl-auto=update` is used only for the development profile; production is set to validate. This avoids adding a migration tool in the skeleton phase.
-- Assumption values remain placeholders and fail fast until supplied.
-- No CSV was moved because the working rule forbids modifying source data.
-- Confirm whether the two blank location CSV columns are intentionally unnamed and which source file should be canonical before import work.
-- Confirm concrete generation, cost, emission, layout, roof-factor, JWT, database, and AI secret values before running production configuration.
+Use `npm run build` to run TypeScript checking and the Vite production build.

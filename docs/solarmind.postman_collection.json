@@ -1,6 +1,6 @@
 {
   "info": {"name": "SolarMind API", "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"},
-  "variable": [{"key":"baseUrl","value":"http://localhost:8080"},{"key":"token","value":""}],
+  "variable": [{"key":"baseUrl","value":"http://localhost:8080"},{"key":"token","value":""},{"key":"assessmentId","value":"1"},{"key":"panelId","value":"1"}],
   "item": [
     {"name":"Health","request":{"method":"GET","url":"{{baseUrl}}/api/health"}},
     {"name":"Register","request":{"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"name\":\"Example User\",\"email\":\"user@example.com\",\"password\":\"PLACEHOLDER_PASSWORD\",\"confirmPassword\":\"PLACEHOLDER_PASSWORD\"}"},"url":"{{baseUrl}}/api/auth/register"}},
@@ -8,6 +8,9 @@
     {"name":"Location search","request":{"method":"GET","url":"{{baseUrl}}/api/locations/search?query=Delhi&limit=10"}},
     {"name":"Panels","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{token}}"}],"url":"{{baseUrl}}/api/panels?page=0&size=20"}},
     {"name":"Create assessment","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{token}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"locationId\":null,\"monthlyConsumption\":null,\"monthlyBill\":null,\"roofArea\":null,\"roofType\":\"FLAT\",\"budget\":null}"},"url":"{{baseUrl}}/api/assessments"}},
+    {"name":"List assessments","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{token}}"}],"url":"{{baseUrl}}/api/assessments"}},
+    {"name":"Get assessment by id","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{token}}"}],"url":"{{baseUrl}}/api/assessments/{{assessmentId}}"}},
+    {"name":"Get panel by id","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{token}}"}],"url":"{{baseUrl}}/api/panels/{{panelId}}"}},
     {"name":"Dashboard","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{token}}"}],"url":"{{baseUrl}}/api/dashboard"}},
     {"name":"Ask AI","request":{"method":"POST","header":[{"key":"Authorization","value":"Bearer {{token}}"},{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"question\":\"Why was this estimate chosen?\"}"},"url":"{{baseUrl}}/api/ai/ask"}}
   ]

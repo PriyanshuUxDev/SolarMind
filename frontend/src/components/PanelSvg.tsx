@@ -25,3 +25,10 @@ export default function PanelSvg({
     </div>
   );
 }
+
+export function parsePanelDimensions(dimensions?: string) {
+  const values = dimensions?.match(/[0-9]+(?:[.,][0-9]+)?/g) ?? [];
+  const widthMm = values[0] ? Number(values[0].replace(",", ".")) : 1000;
+  const heightMm = values[1] ? Number(values[1].replace(",", ".")) : 1700;
+  return { widthMm, heightMm };
+}

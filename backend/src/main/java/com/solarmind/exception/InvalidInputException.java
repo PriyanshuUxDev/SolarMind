@@ -1,1 +1,7 @@
-package com.solarmind.exception; public class InvalidInputException extends RuntimeException { public InvalidInputException(String message){super(message);} }
+package com.solarmind.exception;
+
+public class InvalidInputException extends RuntimeException {
+  public InvalidInputException(String message) {
+    super(message);
+  }
+}

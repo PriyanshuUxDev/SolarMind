@@ -12,7 +12,7 @@ SolarMind is a scoped rooftop-solar recommendation app. Spring Boot owns authent
 
 ## Run
 
-### Fast local backend smoke run
+### Local backend with MySQL
 
 From PowerShell at the repository root:
 
@@ -20,9 +20,10 @@ From PowerShell at the repository root:
 .\backend\run-dev.ps1
 ```
 
-This uses an isolated in-memory H2 database, imports the supplied CSV files,
-and generates a temporary JWT secret for that process. The assumptions in the
-`local` profile are test-only values; do not use them for real recommendations.
+Before starting, set `DATABASE_URL`, `DATABASE_USERNAME`, and
+`DATABASE_PASSWORD` for your MySQL `solarmind` database. The launcher runs the
+`local` profile against MySQL, applies the Flyway schema, imports the supplied
+CSV files. `JWT_SECRET` and `AI_INTERNAL_TOKEN` must be set explicitly.
 `GET http://localhost:8080/api/health` should return `{"status":"ok"}`.
 
 ### Full local stack with MySQL
@@ -34,5 +35,9 @@ and generates a temporary JWT secret for that process. The assumptions in the
 5. Frontend: `cd frontend; npm install; npm run dev`
 
 The two supplied CSVs are read from `data/` by default through `PANELS_CSV_PATH` and `LOCATIONS_CSV_PATH`. They are never modified. The generation factor, installation cost, emission factor, roof layout factor, and roof-type factors must be supplied through environment variables; no real-looking defaults are committed.
+
+For an existing database without `flyway_schema_history`, take a backup and
+perform a one-time Flyway baseline before normal migration validation. See the
+run guide for the difference between the `local` and `dev` profiles.
 
 See [docs/architecture-map.md](docs/architecture-map.md) for the structure and endpoint map.

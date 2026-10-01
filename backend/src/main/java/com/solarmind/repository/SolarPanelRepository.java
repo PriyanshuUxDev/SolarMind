@@ -1,1 +1,26 @@
-package com.solarmind.repository; import com.solarmind.entity.SolarPanel; import org.springframework.data.jpa.repository.*; import org.springframework.data.repository.query.Param; import com.solarmind.entity.SolarPanel; import java.util.*; public interface SolarPanelRepository extends JpaRepository<SolarPanel,Long>{Optional<SolarPanel> findByBrandAndModel(String brand,String model); @Query("select p from SolarPanel p where (:q is null or lower(p.brand) like lower(concat('%',:q,'%')) or lower(p.model) like lower(concat('%',:q,'%'))) and (:brand is null or p.brand=:brand) and (:minW is null or p.wattage>=:minW) and (:maxW is null or p.wattage<=:maxW) and (:minE is null or p.efficiency>=:minE)") org.springframework.data.domain.Page<SolarPanel> search(@Param("q") String q,@Param("brand") String brand,@Param("minW") Integer minW,@Param("maxW") Integer maxW,@Param("minE") java.math.BigDecimal minE,org.springframework.data.domain.Pageable pageable); @Query("select distinct p.brand from SolarPanel p order by p.brand") List<String> brands();}
+package com.solarmind.repository;
+
+import com.solarmind.entity.SolarPanel;
+import java.util.*;
+import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.Param;
+
+public interface SolarPanelRepository extends JpaRepository<SolarPanel, Long> {
+  Optional<SolarPanel> findByBrandAndModel(String brand, String model);
+
+  @Query(
+      "select p from SolarPanel p where (:q is null or lower(p.brand) like"
+          + " lower(concat('%',:q,'%')) or lower(p.model) like lower(concat('%',:q,'%'))) and"
+          + " (:brand is null or p.brand=:brand) and (:minW is null or p.wattage>=:minW) and (:maxW"
+          + " is null or p.wattage<=:maxW) and (:minE is null or p.efficiency>=:minE)")
+  org.springframework.data.domain.Page<SolarPanel> search(
+      @Param("q") String q,
+      @Param("brand") String brand,
+      @Param("minW") Integer minW,
+      @Param("maxW") Integer maxW,
+      @Param("minE") java.math.BigDecimal minE,
+      org.springframework.data.domain.Pageable pageable);
+
+  @Query("select distinct p.brand from SolarPanel p order by p.brand")
+  List<String> brands();
+}

@@ -1,1 +1,3 @@
-package com.solarmind.dto.response; public record AskResponse(String answer){}
+package com.solarmind.dto.response;
+
+public record AskResponse(String answer) {}

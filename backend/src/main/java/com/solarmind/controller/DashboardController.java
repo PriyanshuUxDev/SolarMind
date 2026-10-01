@@ -1,1 +1,20 @@
-package com.solarmind.controller; import com.solarmind.dto.response.DashboardResponse; import com.solarmind.service.DashboardService; import org.springframework.web.bind.annotation.*; @RestController @RequestMapping("/api/dashboard") public class DashboardController { private final DashboardService s; public DashboardController(DashboardService s){this.s=s;} @GetMapping DashboardResponse get(){return s.get();} }
+package com.solarmind.controller;
+
+import com.solarmind.dto.response.DashboardResponse;
+import com.solarmind.service.DashboardService;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/dashboard")
+public class DashboardController {
+  private final DashboardService s;
+
+  public DashboardController(DashboardService s) {
+    this.s = s;
+  }
+
+  @GetMapping
+  DashboardResponse get() {
+    return s.get();
+  }
+}

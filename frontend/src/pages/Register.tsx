@@ -1,12 +1,14 @@
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { api } from "../services/api";
+import { ApiError, api } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 import Field from "../components/Field";
 import Input from "../components/Input";
 import Button from "../components/Button";
 import ErrorMessage from "../components/ErrorMessage";
 
 export default function Register() {
+  const { login } = useAuth();
   const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -28,10 +30,15 @@ export default function Register() {
     setBusy(true);
     setError("");
     try {
-      await api.register(form);
-      navigate("/login");
-    } catch {
-      setError("That email may already be registered. Try logging in instead.");
+      const response = await api.register(form);
+      login(response.token);
+      navigate("/dashboard");
+    } catch (requestError) {
+      setError(
+        requestError instanceof ApiError
+          ? requestError.message
+          : "That email may already be registered. Try logging in instead.",
+      );
     } finally {
       setBusy(false);
     }

@@ -15,6 +15,7 @@ const number = (value: number) =>
 export default function Dashboard() {
   const [data, setData] = useState<DashboardResponse | null>(null);
   const [error, setError] = useState("");
+  const [expandedId, setExpandedId] = useState<number | null>(null);
   function load() {
     setError("");
     api
@@ -107,16 +108,53 @@ export default function Dashboard() {
           >
             <div className="table-row table-header" role="row">
               <span>Date</span>
+              <span>Location / panel</span>
               <span>Capacity</span>
-              <span>Savings</span>
             </div>
             {data.recentAssessments.map((item) => (
-              <div className="table-row" role="row" key={item.id}>
-                <span>
-                  {new Date(item.createdAt).toLocaleDateString("en-IN")}
-                </span>
-                <span>{number(item.recommendedCapacityKw)} kW estimated</span>
-                <span>₹{number(item.annualSavings)} estimated</span>
+              <div key={item.id} className="assessment-table-group">
+                <button
+                  className="table-row table-expand"
+                  type="button"
+                  role="row"
+                  aria-expanded={expandedId === item.id}
+                  aria-controls={"assessment-details-" + item.id}
+                  onClick={() =>
+                    setExpandedId((current) =>
+                      current === item.id ? null : item.id,
+                    )
+                  }
+                >
+                  <span>
+                    {new Date(item.createdAt).toLocaleDateString("en-IN")}
+                  </span>
+                  <span>
+                    {item.locationLabel} · {item.selectedPanelBrand}{" "}
+                    {item.selectedPanelModel}
+                  </span>
+                  <span>{number(item.recommendedCapacityKw)} kW estimated</span>
+                </button>
+                {expandedId === item.id && (
+                  <div
+                    className="table-detail"
+                    id={"assessment-details-" + item.id}
+                    role="region"
+                    aria-label={"Details for assessment from " + item.createdAt}
+                  >
+                    <span>Annual savings: ₹{number(item.annualSavings)}</span>
+                    <span>Installation: ₹{number(item.estimatedCost)}</span>
+                    <span>
+                      Payback:{" "}
+                      {item.paybackYears === null
+                        ? "Not applicable"
+                        : number(item.paybackYears) + " years"}
+                    </span>
+                    <span>Roof: {item.roofFeasible ? "Fits" : "May not fit"}</span>
+                    <span>
+                      Budget: {item.withinBudget ? "Within budget" : "Above budget"}
+                    </span>
+                  </div>
+                )}
               </div>
             ))}
           </div>

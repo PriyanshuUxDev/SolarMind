@@ -16,8 +16,13 @@ export type PanelResponse = {
   brand: string;
   model: string;
   wattage: number;
+  dailyOutput?: number;
+  monthlyOutput?: number;
   efficiency: number;
+  vmpp?: number;
+  impp?: number;
   dimensions: string;
+  weight?: number;
 };
 export type AssessmentResponse = {
   id: number;
@@ -30,7 +35,8 @@ export type AssessmentResponse = {
   annualSavings: number;
   estimatedCost: number;
   paybackYears: number | null;
-  co2Reduction: number;
+  co2Kg: number;
+  co2Tonnes: number;
   effectiveTariff: number;
   requiredRoofArea: number;
   roofFeasible: boolean;
@@ -40,13 +46,27 @@ export type AssessmentResponse = {
 };
 export type AssessmentSummary = {
   id: number;
+  locationLabel: string;
+  selectedPanelBrand: string;
+  selectedPanelModel: string;
   recommendedCapacityKw: number;
   annualSavings: number;
+  estimatedCost: number;
+  paybackYears: number | null;
+  roofFeasible: boolean;
+  withinBudget: boolean;
   createdAt: string;
 };
 export type DashboardResponse = {
   latest: AssessmentResponse | null;
   recentAssessments: AssessmentSummary[];
+};
+export type ApiErrorPayload = {
+  timestamp?: string;
+  status?: number;
+  error?: string;
+  message?: string;
+  path?: string;
 };
 export type PagedResponse<T> = {
   content: T[];

@@ -1,6 +1,6 @@
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { api } from "../services/api";
+import { ApiError, api } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import Field from "../components/Field";
 import Input from "../components/Input";
@@ -22,8 +22,12 @@ export default function Login() {
       const response = await api.login({ email, password });
       login(response.token);
       navigate("/dashboard");
-    } catch {
-      setError("That email or password was not recognised.");
+    } catch (requestError) {
+      setError(
+        requestError instanceof ApiError
+          ? requestError.message
+          : "That email or password was not recognised.",
+      );
     } finally {
       setBusy(false);
     }

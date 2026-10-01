@@ -1,14 +1,33 @@
 $ErrorActionPreference = 'Stop'
 
-# This launcher is for local development only. Production still uses MySQL,
-# environment-backed assumptions, and a separately managed JWT secret.
 $repoRoot = Split-Path -Parent $PSScriptRoot
-$jwtBytes = New-Object byte[] 32
-$rng = New-Object System.Security.Cryptography.RNGCryptoServiceProvider
-$rng.GetBytes($jwtBytes)
-$rng.Dispose()
-$env:JWT_SECRET = [Convert]::ToBase64String($jwtBytes)
-$env:AI_INTERNAL_TOKEN = 'local-' + [Guid]::NewGuid().ToString('N')
+
+function Import-DotEnv([string]$path) {
+    if (-not (Test-Path -LiteralPath $path)) { return }
+    foreach ($line in Get-Content -LiteralPath $path) {
+        if ($line -match '^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$') {
+            $name = $matches[1]
+            $value = $matches[2]
+            if ($value.Length -ge 2 -and (($value.StartsWith('"') -and $value.EndsWith('"')) -or ($value.StartsWith("'") -and $value.EndsWith("'")))) {
+                $value = $value.Substring(1, $value.Length - 2)
+            }
+            if ([string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($name))) {
+                Set-Item -Path "Env:$name" -Value $value
+            }
+        }
+    }
+}
+
+Import-DotEnv (Join-Path $repoRoot '.env')
+
+$missingDatabase = @('DATABASE_URL', 'DATABASE_USERNAME', 'DATABASE_PASSWORD') | Where-Object { [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($_)) }
+if ($missingDatabase.Count -gt 0) {
+    throw "MySQL configuration is missing: $($missingDatabase -join ', '). Set these variables before starting the backend."
+}
+$missingSecrets = @('JWT_SECRET', 'AI_INTERNAL_TOKEN') | Where-Object { [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($_)) }
+if ($missingSecrets.Count -gt 0) {
+    throw "Required secrets are missing: $($missingSecrets -join ', '). Set them before starting the backend."
+}
 $env:PANELS_CSV_PATH = Join-Path $repoRoot 'data\solar_panels_india.csv'
 $env:LOCATIONS_CSV_PATH = Join-Path $repoRoot 'data\punjab_delhi_ncr_coordinates.csv'
 

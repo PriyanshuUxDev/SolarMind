@@ -132,7 +132,6 @@ export default function Home() {
       <footer className="site-footer">
         <span>SolarMind</span>
         <span>Estimates are not quotes or engineering approvals.</span>
-        <Link to="/">Media credits</Link>
       </footer>
     </main>
   );

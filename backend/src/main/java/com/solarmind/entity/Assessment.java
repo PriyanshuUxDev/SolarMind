@@ -1,3 +1,248 @@
 package com.solarmind.entity;
-import jakarta.persistence.*; import java.math.BigDecimal; import java.time.Instant;
-@Entity @Table(name="assessments",indexes=@Index(name="idx_assessments_user_created",columnList="user_id,created_at")) public class Assessment { @Id @GeneratedValue(strategy=GenerationType.IDENTITY) private Long id; @ManyToOne(optional=false) private User user; @ManyToOne private Location location; @ManyToOne private SolarPanel selectedPanel; private BigDecimal monthlyConsumption,monthlyBill,roofArea,budget,effectiveTariff,requiredRoofArea,recommendedCapacityKw,actualCapacityKw,annualGeneration,annualSavings,estimatedCost,paybackYears,co2Reduction; private String roofType; private Integer panelCount; private boolean roofFeasible,withinBudget; private Instant createdAt=Instant.now(); protected Assessment(){} public Assessment(User user,Location location){this.user=user;this.location=location;} public Long getId(){return id;} public User getUser(){return user;} public Location getLocation(){return location;} public SolarPanel getSelectedPanel(){return selectedPanel;} public void setSelectedPanel(SolarPanel v){selectedPanel=v;} public BigDecimal getMonthlyConsumption(){return monthlyConsumption;} public void setMonthlyConsumption(BigDecimal v){monthlyConsumption=v;} public BigDecimal getMonthlyBill(){return monthlyBill;} public void setMonthlyBill(BigDecimal v){monthlyBill=v;} public BigDecimal getRoofArea(){return roofArea;} public void setRoofArea(BigDecimal v){roofArea=v;} public BigDecimal getBudget(){return budget;} public void setBudget(BigDecimal v){budget=v;} public BigDecimal getEffectiveTariff(){return effectiveTariff;} public void setEffectiveTariff(BigDecimal v){effectiveTariff=v;} public BigDecimal getRequiredRoofArea(){return requiredRoofArea;} public void setRequiredRoofArea(BigDecimal v){requiredRoofArea=v;} public BigDecimal getRecommendedCapacityKw(){return recommendedCapacityKw;} public void setRecommendedCapacityKw(BigDecimal v){recommendedCapacityKw=v;} public BigDecimal getActualCapacityKw(){return actualCapacityKw;} public void setActualCapacityKw(BigDecimal v){actualCapacityKw=v;} public BigDecimal getAnnualGeneration(){return annualGeneration;} public void setAnnualGeneration(BigDecimal v){annualGeneration=v;} public BigDecimal getAnnualSavings(){return annualSavings;} public void setAnnualSavings(BigDecimal v){annualSavings=v;} public BigDecimal getEstimatedCost(){return estimatedCost;} public void setEstimatedCost(BigDecimal v){estimatedCost=v;} public BigDecimal getPaybackYears(){return paybackYears;} public void setPaybackYears(BigDecimal v){paybackYears=v;} public BigDecimal getCo2Reduction(){return co2Reduction;} public void setCo2Reduction(BigDecimal v){co2Reduction=v;} public String getRoofType(){return roofType;} public void setRoofType(String v){roofType=v;} public Integer getPanelCount(){return panelCount;} public void setPanelCount(Integer v){panelCount=v;} public boolean isRoofFeasible(){return roofFeasible;} public void setRoofFeasible(boolean v){roofFeasible=v;} public boolean isWithinBudget(){return withinBudget;} public void setWithinBudget(boolean v){withinBudget=v;} public Instant getCreatedAt(){return createdAt;} }
+
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.time.Instant;
+
+@Entity
+@Table(
+    name = "assessments",
+    indexes = @Index(name = "idx_assessments_user_created", columnList = "user_id,created_at"))
+public class Assessment {
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
+
+  @ManyToOne
+  @JoinColumn(name = "location_id")
+  private Location location;
+
+  @ManyToOne
+  @JoinColumn(name = "selected_panel_id")
+  private SolarPanel selectedPanel;
+
+  @Column(name = "monthly_consumption", precision = 19, scale = 8)
+  private BigDecimal monthlyConsumption;
+
+  @Column(name = "monthly_bill", precision = 19, scale = 8)
+  private BigDecimal monthlyBill;
+
+  @Column(name = "roof_area", precision = 19, scale = 8)
+  private BigDecimal roofArea;
+
+  @Column(name = "budget", precision = 19, scale = 8)
+  private BigDecimal budget;
+
+  @Column(name = "effective_tariff", precision = 19, scale = 8)
+  private BigDecimal effectiveTariff;
+
+  @Column(name = "required_roof_area", precision = 19, scale = 8)
+  private BigDecimal requiredRoofArea;
+
+  @Column(name = "recommended_capacity_kw", precision = 19, scale = 8)
+  private BigDecimal recommendedCapacityKw;
+
+  @Column(name = "actual_capacity_kw", precision = 19, scale = 8)
+  private BigDecimal actualCapacityKw;
+
+  @Column(name = "annual_generation", precision = 19, scale = 8)
+  private BigDecimal annualGeneration;
+
+  @Column(name = "annual_savings", precision = 19, scale = 8)
+  private BigDecimal annualSavings;
+
+  @Column(name = "estimated_cost", precision = 19, scale = 8)
+  private BigDecimal estimatedCost;
+
+  @Column(name = "payback_years", precision = 19, scale = 8)
+  private BigDecimal paybackYears;
+
+  @Column(name = "co2_reduction", precision = 19, scale = 8)
+  private BigDecimal co2Reduction;
+
+  @Column(name = "roof_type", length = 191)
+  private String roofType;
+
+  @Column(name = "panel_count")
+  private Integer panelCount;
+
+  @Column(name = "roof_feasible")
+  private boolean roofFeasible;
+
+  @Column(name = "within_budget")
+  private boolean withinBudget;
+
+  @Column(name = "created_at", nullable = false)
+  private Instant createdAt = Instant.now();
+
+  protected Assessment() {}
+
+  public Assessment(User user, Location location) {
+    this.user = user;
+    this.location = location;
+  }
+
+  public Long getId() {
+    return id;
+  }
+
+  public User getUser() {
+    return user;
+  }
+
+  public Location getLocation() {
+    return location;
+  }
+
+  public SolarPanel getSelectedPanel() {
+    return selectedPanel;
+  }
+
+  public void setSelectedPanel(SolarPanel v) {
+    selectedPanel = v;
+  }
+
+  public BigDecimal getMonthlyConsumption() {
+    return monthlyConsumption;
+  }
+
+  public void setMonthlyConsumption(BigDecimal v) {
+    monthlyConsumption = v;
+  }
+
+  public BigDecimal getMonthlyBill() {
+    return monthlyBill;
+  }
+
+  public void setMonthlyBill(BigDecimal v) {
+    monthlyBill = v;
+  }
+
+  public BigDecimal getRoofArea() {
+    return roofArea;
+  }
+
+  public void setRoofArea(BigDecimal v) {
+    roofArea = v;
+  }
+
+  public BigDecimal getBudget() {
+    return budget;
+  }
+
+  public void setBudget(BigDecimal v) {
+    budget = v;
+  }
+
+  public BigDecimal getEffectiveTariff() {
+    return effectiveTariff;
+  }
+
+  public void setEffectiveTariff(BigDecimal v) {
+    effectiveTariff = v;
+  }
+
+  public BigDecimal getRequiredRoofArea() {
+    return requiredRoofArea;
+  }
+
+  public void setRequiredRoofArea(BigDecimal v) {
+    requiredRoofArea = v;
+  }
+
+  public BigDecimal getRecommendedCapacityKw() {
+    return recommendedCapacityKw;
+  }
+
+  public void setRecommendedCapacityKw(BigDecimal v) {
+    recommendedCapacityKw = v;
+  }
+
+  public BigDecimal getActualCapacityKw() {
+    return actualCapacityKw;
+  }
+
+  public void setActualCapacityKw(BigDecimal v) {
+    actualCapacityKw = v;
+  }
+
+  public BigDecimal getAnnualGeneration() {
+    return annualGeneration;
+  }
+
+  public void setAnnualGeneration(BigDecimal v) {
+    annualGeneration = v;
+  }
+
+  public BigDecimal getAnnualSavings() {
+    return annualSavings;
+  }
+
+  public void setAnnualSavings(BigDecimal v) {
+    annualSavings = v;
+  }
+
+  public BigDecimal getEstimatedCost() {
+    return estimatedCost;
+  }
+
+  public void setEstimatedCost(BigDecimal v) {
+    estimatedCost = v;
+  }
+
+  public BigDecimal getPaybackYears() {
+    return paybackYears;
+  }
+
+  public void setPaybackYears(BigDecimal v) {
+    paybackYears = v;
+  }
+
+  public BigDecimal getCo2Reduction() {
+    return co2Reduction;
+  }
+
+  public void setCo2Reduction(BigDecimal v) {
+    co2Reduction = v;
+  }
+
+  public String getRoofType() {
+    return roofType;
+  }
+
+  public void setRoofType(String v) {
+    roofType = v;
+  }
+
+  public Integer getPanelCount() {
+    return panelCount;
+  }
+
+  public void setPanelCount(Integer v) {
+    panelCount = v;
+  }
+
+  public boolean isRoofFeasible() {
+    return roofFeasible;
+  }
+
+  public void setRoofFeasible(boolean v) {
+    roofFeasible = v;
+  }
+
+  public boolean isWithinBudget() {
+    return withinBudget;
+  }
+
+  public void setWithinBudget(boolean v) {
+    withinBudget = v;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
+}
