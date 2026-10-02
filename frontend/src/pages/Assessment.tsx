@@ -12,6 +12,7 @@ import LedgerRow from "../components/LedgerRow";
 import Badge from "../components/Badge";
 import PanelSvg, { parsePanelDimensions } from "../components/PanelSvg";
 import SunArc from "../components/SunArc";
+import CellGrid from "../components/CellGrid";
 import CountUp from "../components/CountUp";
 
 const money = (value: number) =>
@@ -265,7 +266,23 @@ export default function Assessment() {
             <Button type="submit">Get recommendation</Button>
           )}
         </form>
-        {result && <Result result={result} />}
+        {result ? (
+          <Result result={result} />
+        ) : (
+          <aside className="assessment-visual" aria-label="Solar assessment illustration">
+            <CellGrid />
+            <div className="assessment-visual-sun" />
+            <SunArc className="assessment-visual-arc" />
+            <div className="assessment-visual-roof" aria-hidden="true">
+              <span /><span /><span /><span />
+            </div>
+            <div className="assessment-visual-note">
+              <span className="eyebrow">Your roof, explained</span>
+              <strong>Small inputs.<br />A clearer direction.</strong>
+              <p>We turn your details into an estimate you can inspect.</p>
+            </div>
+          </aside>
+        )}
       </div>
     </main>
   );

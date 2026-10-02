@@ -22,7 +22,10 @@ class RecommendationServiceTest {
           new BigDecimal("100"),
           new BigDecimal("0.5"),
           new BigDecimal("1"),
-          Map.of("FLAT", BigDecimal.ONE, "SLOPED", BigDecimal.ONE, "OTHER", BigDecimal.ONE));
+          Map.of("FLAT", BigDecimal.ONE, "SLOPED", BigDecimal.ONE, "OTHER", BigDecimal.ONE),
+          25,
+          BigDecimal.ZERO,
+          BigDecimal.ZERO);
   private final RecommendationService service =
       new RecommendationService(panels, properties, new ConfigGenerationEstimator(properties));
 

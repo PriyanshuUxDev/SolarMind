@@ -23,7 +23,8 @@ Import-DotEnv (Join-Path $serviceRoot '.env')
 
 $required = @('AI_INTERNAL_TOKEN', 'GEMINI_API_KEY', 'GEMINI_MODEL')
 $missing = $required | Where-Object {
-    [string]::IsNullOrWhiteSpace([Environment]::GetEnvironmentVariable($_))
+    $value = [Environment]::GetEnvironmentVariable($_)
+    [string]::IsNullOrWhiteSpace($value) -or $value -match '(?i)^placeholder'
 }
 if ($missing.Count -gt 0) {
     throw "AI service configuration is missing: $($missing -join ', '). Set these variables in ai-service\.env or the repository .env."

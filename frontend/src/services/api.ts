@@ -46,13 +46,13 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   }
   if (!r.ok) {
     const text = await r.text();
-    let payload: { message?: string; status?: number } = {};
+    let payload: { message?: string; detail?: string; status?: number } = {};
     try {
       payload = JSON.parse(text);
     } catch {
       // The fallback below keeps network/proxy errors user-readable.
     }
-    const message = payload.message || text || "Request failed";
+    const message = payload.message || payload.detail || text || "Request failed";
     throw new ApiError(message, payload.status || r.status, parseFieldMessages(message));
   }
   return r.json();

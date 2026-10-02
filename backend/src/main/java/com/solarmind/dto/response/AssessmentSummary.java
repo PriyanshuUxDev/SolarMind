@@ -9,6 +9,7 @@ public record AssessmentSummary(
     String selectedPanelBrand,
     String selectedPanelModel,
     BigDecimal recommendedCapacityKw,
+    BigDecimal actualCapacityKw,
     BigDecimal annualSavings,
     BigDecimal estimatedCost,
     BigDecimal paybackYears,

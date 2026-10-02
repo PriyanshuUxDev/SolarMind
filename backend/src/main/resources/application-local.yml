@@ -27,6 +27,9 @@ solarmind:
       FLAT: ${ROOF_TYPE_USABLE_FACTOR_FLAT}
       SLOPED: ${ROOF_TYPE_USABLE_FACTOR_SLOPED}
       OTHER: ${ROOF_TYPE_USABLE_FACTOR_OTHER}
+    system-lifespan-years: ${SYSTEM_LIFESPAN_YEARS:25}
+    tariff-escalation-rate: ${TARIFF_ESCALATION_RATE:0.0}
+    panel-degradation-rate: ${PANEL_DEGRADATION_RATE:0.0}
   ai:
     service-url: http://localhost:8000
     timeout: 5s

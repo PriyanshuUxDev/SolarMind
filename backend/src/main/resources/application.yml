@@ -19,6 +19,11 @@ solarmind:
       FLAT: ${ROOF_TYPE_USABLE_FACTOR_FLAT}
       SLOPED: ${ROOF_TYPE_USABLE_FACTOR_SLOPED}
       OTHER: ${ROOF_TYPE_USABLE_FACTOR_OTHER}
+    # Default planning horizon; this is an estimate, not a warranty of system life.
+    system-lifespan-years: ${SYSTEM_LIFESPAN_YEARS:25}
+    # Default 0%; configure only when supported by evidence.
+    tariff-escalation-rate: ${TARIFF_ESCALATION_RATE:0.0}
+    panel-degradation-rate: ${PANEL_DEGRADATION_RATE:0.0}
   ai.service-url: ${AI_SERVICE_URL}
   ai.timeout: ${AI_TIMEOUT:20s}
   ai.internal-token: ${AI_INTERNAL_TOKEN}

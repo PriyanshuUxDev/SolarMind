@@ -41,7 +41,10 @@ class AssessmentServiceTest {
           BigDecimal.ONE,
           BigDecimal.ONE,
           BigDecimal.ONE,
-          Map.of("FLAT", BigDecimal.ONE));
+          Map.of("FLAT", BigDecimal.ONE),
+          25,
+          BigDecimal.ZERO,
+          BigDecimal.ZERO);
   private final RecommendationService recommendations =
       new RecommendationService(panels, properties, new ConfigGenerationEstimator(properties));
   private final AssessmentService service =

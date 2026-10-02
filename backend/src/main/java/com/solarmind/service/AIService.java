@@ -24,8 +24,8 @@ public class AIService {
   }
 
   public AskResponse ask(AskRequest r) {
-    Object context = r.assessmentId() == null ? Map.of() : assessments.get(r.assessmentId());
     try {
+      Object context = r.assessmentId() == null ? Map.of() : assessments.get(r.assessmentId());
       return client
           .post()
           .uri(properties.serviceUrl() + "/api/ai/ask")
@@ -35,7 +35,8 @@ public class AIService {
           .body(AskResponse.class);
     } catch (Exception e) {
       log.warn("AI service request failed: {}", e.getClass().getSimpleName(), e);
-      throw new AiServiceUnavailableException("AI service is unavailable");
+      throw new AiServiceUnavailableException(
+          "AI service is unavailable. Check that the AI service is running and configured.");
     }
   }
 }

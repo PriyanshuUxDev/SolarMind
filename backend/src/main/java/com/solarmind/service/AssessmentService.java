@@ -85,6 +85,7 @@ public class AssessmentService {
                     a.getSelectedPanel().getBrand(),
                     a.getSelectedPanel().getModel(),
                     a.getRecommendedCapacityKw(),
+                    a.getActualCapacityKw(),
                     a.getAnnualSavings(),
                     a.getEstimatedCost(),
                     a.getPaybackYears(),
@@ -94,8 +95,17 @@ public class AssessmentService {
         .toList();
   }
 
+  public List<Assessment> recentEntities() {
+    return assessments.findTop10ByUserOrderByCreatedAtDesc(user());
+  }
+
   public AssessmentResponse latest() {
     return assessments.findFirstByUserOrderByCreatedAtDesc(user()).map(this::map).orElse(null);
+  }
+
+  /** Returns the latest stored assessment for dashboard-only calculations. */
+  public Assessment latestEntity() {
+    return assessments.findFirstByUserOrderByCreatedAtDesc(user()).orElse(null);
   }
 
   private AssessmentResponse map(Assessment a) {

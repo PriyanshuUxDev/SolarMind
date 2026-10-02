@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { api } from "../services/api";
+import { api, ApiError } from "../services/api";
 import type { AssessmentResponse, AssessmentSummary } from "../types";
 import Input from "../components/Input";
 import Button from "../components/Button";
@@ -64,8 +64,8 @@ export default function Assistant() {
     try {
       const response = await api.ask({ question: trimmed, assessmentId });
       setMessages((current) => [...current, { role: "assistant", text: response.answer }]);
-    } catch {
-      setError("The assistant is unavailable right now.");
+    } catch (cause) {
+      setError(cause instanceof ApiError ? cause.message : "The assistant is unavailable right now.");
     } finally {
       setBusy(false);
     }

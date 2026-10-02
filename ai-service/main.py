@@ -13,13 +13,20 @@ class Settings(BaseSettings):
     gemini_model: str = ""
 
     model_config = SettingsConfigDict(
-        env_file=Path(__file__).resolve().with_name(".env"),
+        env_file=(
+            Path(__file__).resolve().with_name(".env"),
+            Path(__file__).resolve().parent.parent / ".env",
+        ),
         env_file_encoding="utf-8",
         extra="ignore",
     )
 
 settings = Settings()
 app = FastAPI(title="SolarMind AI Service")
+
+def configured(value: str) -> bool:
+    """Treat template values as missing so the service fails clearly at startup/use."""
+    return bool(value.strip()) and not value.strip().lower().startswith("placeholder")
 
 class AskRequest(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
@@ -36,12 +43,15 @@ def health():
 
 @app.post("/api/ai/ask", response_model=AskResponse)
 def ask(request: AskRequest, x_internal_token: str | None = Header(default=None)):
-    if not settings.ai_internal_token:
+    if not configured(settings.ai_internal_token):
         raise HTTPException(status_code=503, detail="AI service authentication is not configured")
     if x_internal_token is None or not hmac.compare_digest(x_internal_token, settings.ai_internal_token):
         raise HTTPException(status_code=401, detail="Invalid internal token")
-    if not settings.gemini_api_key or not settings.gemini_model:
+    if not configured(settings.gemini_api_key) or not configured(settings.gemini_model):
         raise HTTPException(status_code=503, detail="AI service is not configured")
+    model = settings.gemini_model.strip()
+    if model.startswith("models/"):
+        model = model.removeprefix("models/")
     payload = {
         "system_instruction": {"parts": [{"text": SYSTEM_INSTRUCTION}]},
         "contents": [
@@ -60,13 +70,16 @@ def ask(request: AskRequest, x_internal_token: str | None = Header(default=None)
     }
     try:
         response = httpx.post(
-            f"https://generativelanguage.googleapis.com/v1beta/models/{settings.gemini_model}:generateContent",
+            f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent",
             headers={"x-goog-api-key": settings.gemini_api_key},
             json=payload,
             timeout=20,
         )
         response.raise_for_status()
-        text = response.json()["candidates"][0]["content"]["parts"][0]["text"]
+        candidates = response.json().get("candidates", [])
+        text = candidates[0]["content"]["parts"][0]["text"]
+        if not text.strip():
+            raise ValueError("Gemini returned an empty answer")
         return AskResponse(answer=text)
-    except (httpx.HTTPError, json.JSONDecodeError, KeyError, IndexError, TypeError) as exc:
+    except (httpx.HTTPError, json.JSONDecodeError, KeyError, IndexError, TypeError, ValueError) as exc:
         raise HTTPException(status_code=503, detail="AI service is unavailable") from exc

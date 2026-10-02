@@ -50,6 +50,7 @@ export type AssessmentSummary = {
   selectedPanelBrand: string;
   selectedPanelModel: string;
   recommendedCapacityKw: number;
+  actualCapacityKw: number;
   annualSavings: number;
   estimatedCost: number;
   paybackYears: number | null;
@@ -60,6 +61,58 @@ export type AssessmentSummary = {
 export type DashboardResponse = {
   latest: AssessmentResponse | null;
   recentAssessments: AssessmentSummary[];
+  cumulativeCostComparison: {
+    year: number;
+    withoutSolar: number;
+    withSolar: number;
+  }[];
+  monthlyBillComparison: {
+    before: number;
+    after: number;
+  } | null;
+  solarCoveragePercent: number | null;
+  budgetFit: {
+    budget: number;
+    estimatedCost: number;
+    difference: number;
+    withinBudget: boolean;
+  } | null;
+  roofUtilizationPercent: number | null;
+  lifetimeSavings: number | null;
+  selectedPanel: {
+    brand: string;
+    model: string;
+    wattage: number;
+    efficiency: number;
+  } | null;
+  assessmentDashboards: DashboardAssessment[];
+};
+export type DashboardAssessment = {
+  assessmentId: number;
+  assessment: AssessmentSummary;
+  panelCount: number;
+  annualGeneration: number;
+  cumulativeCostComparison: {
+    year: number;
+    withoutSolar: number;
+    withSolar: number;
+  }[];
+  monthlyBillComparison: { before: number; after: number } | null;
+  solarCoveragePercent: number | null;
+  budgetFit: {
+    budget: number;
+    estimatedCost: number;
+    difference: number;
+    withinBudget: boolean;
+  } | null;
+  roofUtilizationPercent: number | null;
+  lifetimeSavings: number | null;
+  selectedPanel: {
+    brand: string;
+    model: string;
+    wattage: number;
+    efficiency: number;
+  } | null;
 };
 export type ApiErrorPayload = {
   timestamp?: string;
